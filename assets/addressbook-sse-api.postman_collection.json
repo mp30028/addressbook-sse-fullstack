@@ -1,0 +1,158 @@
+{
+	"info": {
+		"_postman_id": "14095312-2268-4f73-a311-40ee045b718f",
+		"name": "addressbook-sse-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "sse listener endpoint",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/sse/persons",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"sse",
+						"persons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/persons/get-all",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"persons",
+						"get-all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "by-id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/persons/by-id/63",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"persons",
+						"by-id",
+						"63"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add-new",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\": \"Number\",\r\n    \"lastname\": \"Sixty-Six\",\r\n    \"dateOfBirth\": \"2000-01-02\",\r\n        \"otherNames\": [\r\n            {\r\n                \"value\": \"Nought\",\r\n                \"otherNameType\": {\r\n                    \"value\": \"Firstname at birth\"\r\n                }\r\n            },\r\n            {\r\n                \"value\": \"Seventy\",\r\n                \"otherNameType\": {\r\n                    \"id\": 7\r\n                }\r\n            },\r\n                        {\r\n                \"value\": \"Jay\",\r\n                \"otherNameType\": {\r\n                    \"value\": \"Nickname\"\r\n                }\r\n            }\r\n        ]\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/persons/add-new",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"persons",
+						"add-new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/persons/delete/65",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"persons",
+						"delete",
+						"65"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\": \"Alright\",\r\n    \"lastname\": \"Sixty-Three\",\r\n    \"dateOfBirth\": \"1968-01-01\",\r\n    \"otherNames\": [\r\n        {\r\n            \"id\": 53,\r\n            \"value\": \"Cool\",\r\n            \"otherNameType\": {\r\n                \"id\": 6,\r\n                \"value\": \"Firstname at birth\"\r\n            }\r\n        },\r\n        {\r\n            \"id\": 54,\r\n            \"value\": \"Cat\",\r\n            \"otherNameType\": {\r\n                \"id\": 7,\r\n                \"value\": \"Lastname at birth\"\r\n            }\r\n        },\r\n        {\r\n            \"id\": 55,\r\n            \"value\": \"Bogg\",\r\n            \"otherNameType\": {\r\n                \"id\": 5,\r\n                \"value\": \"Nickname\"\r\n            }\r\n        }\r\n    ],\r\n    \"key\": 63,\r\n    \"id\": 63\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/persons/update",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"persons",
+						"update"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
