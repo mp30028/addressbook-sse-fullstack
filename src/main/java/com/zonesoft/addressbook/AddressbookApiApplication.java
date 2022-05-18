@@ -21,14 +21,14 @@ public class AddressbookApiApplication {
 		SpringApplication.run(AddressbookApiApplication.class, args);
 	}
 
-//	@Bean
-//	public WebFluxConfigurer corsConfigurer() {
-//		return new WebFluxConfigurer() {
-//			public void addCorsMappings(CorsRegistry registry) {
-//				registry.addMapping("/**").allowedOrigins("http://localhost:3000");
-//			}
-//		};
-//	}
+	@Bean
+	public WebFluxConfigurer corsConfigurer() {
+		return new WebFluxConfigurer() {
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+			}
+		};
+	}
 	
 	@Bean
 	RouterFunction<ServerResponse> staticResourceRouter(){
