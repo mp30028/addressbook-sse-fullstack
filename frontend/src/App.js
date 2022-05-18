@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import './css/Zonesoft.css';
+import './components/OtherName.js'
+import OtherName from './components/OtherName.js';
 
 const API_BASE_URL = 	"/api/persons/get-all";
 
@@ -70,6 +72,7 @@ class App extends Component {
 													<tr key={otherName.id}>
 														<td style={{width: "50%"}}>{otherName.value}</td>
 														<td style={{width: "50%"}}>{otherName.otherNameType.value}</td>
+														<td><OtherName/></td>
 													</tr>
 												)}
 											</tbody>
