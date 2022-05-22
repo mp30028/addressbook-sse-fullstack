@@ -15,10 +15,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @SpringBootApplication
 @Configuration
 @EnableWebFlux
-public class AddressbookApiApplication {
+public class AddressbookSseApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AddressbookApiApplication.class, args);
+		SpringApplication.run(AddressbookSseApplication.class, args);
 	}
 
 	@Bean
