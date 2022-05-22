@@ -4,5 +4,6 @@ public enum PersistenceEventType {
 	CREATE,
 	READ,
 	UPDATE,
-	DELETE
+	DELETE, 
+	EMPTY
 }
