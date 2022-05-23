@@ -1,9 +1,6 @@
 package com.zonesoft.addressbook.events;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
