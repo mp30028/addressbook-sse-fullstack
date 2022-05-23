@@ -1,5 +1,9 @@
 package com.zonesoft.addressbook.events;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +15,12 @@ public class PersistenceEventData {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceEventData.class);
 	private final Person person;
 	private final PersistenceEventType eventType;
+	private final Instant utcEventTime;
 	
 	public PersistenceEventData(PersistenceEventType eventType, Person person) {
 		this.person = person;
 		this.eventType = eventType;
+		this.utcEventTime =Instant.now();
 	}
 
 	public PersistenceEventType getEventType() {
@@ -25,6 +31,10 @@ public class PersistenceEventData {
 		return person;
 	}
 	
+	public Instant getUtcEventTime() {
+		return utcEventTime;
+	}
+
 	@Override
 	public String toString() {
 		ObjectMapper objectMapper = new ObjectMapper();

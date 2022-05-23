@@ -1,5 +1,7 @@
 package com.zonesoft.addressbook.events;
 
+import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +12,8 @@ import javax.persistence.PostUpdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.zonesoft.addressbook.entities.Person;
@@ -18,12 +22,12 @@ import com.zonesoft.addressbook.exceptions.AddressbookException;
 import reactor.core.publisher.SynchronousSink;
 
 @Component
+@EnableScheduling
 public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceEventPublisher.class);
 	private final static BlockingQueue<PersistenceEvent> queue = new LinkedBlockingQueue<>();
-	private static final int MAX_QUEUE_SIZE = 10;
-	private static final long CLEAR_DOWN_WAIT_MS = 1000;
+	private static final long MAX_ALLOWED_AGE_OF_QUEUED_ITEMS_MS = 30000;
 	
 	
     @PostPersist
@@ -51,6 +55,7 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
     
     private void addToQueue(PersistenceEvent event) {
     	LOGGER.debug("About to update queue");
+
     	try {
 			PersistenceEventPublisher.queue.offer(event,10000,TimeUnit.MILLISECONDS);
 		} catch (Exception e) {
@@ -58,16 +63,30 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 			LOGGER.error(errorMessage);
 			throw new AddressbookException(errorMessage);
 		}
-    	if (PersistenceEventPublisher.queue.size() > MAX_QUEUE_SIZE) {
-    		try {
-				PersistenceEventPublisher.queue.poll(CLEAR_DOWN_WAIT_MS,TimeUnit.MILLISECONDS);
-			} catch (Exception e) {
-				String errorMessage = "[EXCEPTION MANAGING QUEUE SIZE] Exception = "+ e.getMessage();
-				LOGGER.warn(errorMessage);
-			}
-    	}
     	logQueue();
     	LOGGER.debug("Queue Update completed");
+    }
+    
+    @Scheduled(fixedDelay = 10000)
+    private void checkAndRemoveAgedEvents() {
+//    	LOGGER.debug("[CLEAN-UP-AGED-EVENTS] Triggered");
+    	boolean isCheckToContinue = true;
+    	Long currentTimevalue = Instant.now().toEpochMilli();
+		do {
+			PersistenceEvent event = PersistenceEventPublisher.queue.peek();
+			if (Objects.nonNull(event)) {
+				Long eventTimevalue = ((PersistenceEventData)event.getSource()).getUtcEventTime().toEpochMilli();
+				if ((currentTimevalue - eventTimevalue) > MAX_ALLOWED_AGE_OF_QUEUED_ITEMS_MS) {
+					PersistenceEventPublisher.queue.poll();
+				}else {
+					isCheckToContinue = false;
+				}
+			}else {
+				isCheckToContinue = false;
+			}
+		} while (isCheckToContinue);
+//		logQueue();
+//		LOGGER.debug("[CLEAN-UP-AGED-EVENTS] Completed");
     }
     
     private void logQueue() {
