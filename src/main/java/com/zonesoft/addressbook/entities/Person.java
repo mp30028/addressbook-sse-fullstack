@@ -21,12 +21,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zonesoft.addressbook.events.forwarders.EventForwarder;
+import com.zonesoft.addressbook.events.PersistenceEventQueue;
 
 
 
 @Entity
-@EntityListeners(EventForwarder.class)
+@EntityListeners(PersistenceEventQueue.class)
 @Table(name="t_person")
 public class Person {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Person.class);
