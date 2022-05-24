@@ -10,7 +10,6 @@ import javax.persistence.PostUpdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import com.zonesoft.addressbook.entities.Person;
@@ -19,7 +18,6 @@ import com.zonesoft.addressbook.exceptions.AddressbookException;
 import reactor.core.publisher.SynchronousSink;
 
 @Component
-@EnableScheduling
 public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceEventPublisher.class);

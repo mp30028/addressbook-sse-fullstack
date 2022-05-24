@@ -24,13 +24,11 @@ public class ServerSentEventController {
 	public ServerSentEventController(IPublisher<PersistenceEvent> publisher) {
     	ServerSentEventController.publisher = publisher;
     	ServerSentEventController.persistenceEventFlux = initializeflux();
-    	
     }
     
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) {
     	ServerSentEventController.persistenceEventFlux.subscribe();
-    	
     }
     
 	private Flux<PersistenceEvent> initializeflux() {
