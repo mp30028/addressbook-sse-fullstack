@@ -1,7 +1,5 @@
 package com.zonesoft.addressbook.events;
 
-import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +11,6 @@ import javax.persistence.PostUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.zonesoft.addressbook.entities.Person;
@@ -27,10 +24,7 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceEventPublisher.class);
 	private final static BlockingQueue<PersistenceEvent> queue = new LinkedBlockingQueue<>();
-	private static final long MAX_ALLOWED_AGE_OF_QUEUED_ITEMS_MS = 30000;
-	
-	
-    @PostPersist
+	@PostPersist
     public void afterInsert(Person person) {
         LOGGER.info("[JPA-EVENT] CREATE completed for PERSON: {} ", person.toString());
         PersistenceEventData source = new PersistenceEventData(PersistenceEventType.CREATE, person);
@@ -65,28 +59,6 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 		}
     	logQueue();
     	LOGGER.debug("Queue Update completed");
-    }
-    
-    @Scheduled(fixedDelay = 10000)
-    private void checkAndRemoveAgedEvents() {
-//    	LOGGER.debug("[CLEAN-UP-AGED-EVENTS] Triggered");
-    	boolean isCheckToContinue = true;
-    	Long currentTimevalue = Instant.now().toEpochMilli();
-		do {
-			PersistenceEvent event = PersistenceEventPublisher.queue.peek();
-			if (Objects.nonNull(event)) {
-				Long eventTimevalue = ((PersistenceEventData)event.getSource()).getUtcEventTime().toEpochMilli();
-				if ((currentTimevalue - eventTimevalue) > MAX_ALLOWED_AGE_OF_QUEUED_ITEMS_MS) {
-					PersistenceEventPublisher.queue.poll();
-				}else {
-					isCheckToContinue = false;
-				}
-			}else {
-				isCheckToContinue = false;
-			}
-		} while (isCheckToContinue);
-//		logQueue();
-//		LOGGER.debug("[CLEAN-UP-AGED-EVENTS] Completed");
     }
     
     private void logQueue() {

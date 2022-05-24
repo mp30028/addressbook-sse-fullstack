@@ -2,17 +2,12 @@ package com.zonesoft.addressbook.controllers;
 
 import com.zonesoft.addressbook.events.IPublisher;
 import com.zonesoft.addressbook.events.PersistenceEvent;
-//import com.zonesoft.addressbook.events.PersistenceEventData;
-//import com.zonesoft.addressbook.events.PersistenceEventType;
-//import com.zonesoft.addressbook.exceptions.AddressbookException;
-
-//import java.util.Objects;
-//import java.util.concurrent.BlockingQueue;
-//import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +24,13 @@ public class ServerSentEventController {
 	public ServerSentEventController(IPublisher<PersistenceEvent> publisher) {
     	ServerSentEventController.publisher = publisher;
     	ServerSentEventController.persistenceEventFlux = initializeflux();
+    	
+    }
+    
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+    	ServerSentEventController.persistenceEventFlux.subscribe();
+    	
     }
     
 	private Flux<PersistenceEvent> initializeflux() {
