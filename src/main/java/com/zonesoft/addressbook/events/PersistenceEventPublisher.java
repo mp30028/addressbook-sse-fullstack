@@ -10,18 +10,30 @@ import javax.persistence.PostUpdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.zonesoft.addressbook.entities.Person;
 import com.zonesoft.addressbook.exceptions.AddressbookException;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
 @Component
-public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
+public class PersistenceEventPublisher {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceEventPublisher.class);
 	private final static BlockingQueue<PersistenceEvent> queue = new LinkedBlockingQueue<>();
+	private static Flux<PersistenceEvent> persistenceEventFlux;
+    
+    @Autowired
+	public PersistenceEventPublisher() {
+    	PersistenceEventPublisher.persistenceEventFlux = initializeflux();
+    }
+	
 	@PostPersist
     public void afterInsert(Person person) {
         LOGGER.info("[JPA-EVENT] CREATE completed for PERSON: {} ", person.toString());
@@ -36,18 +48,15 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
         addToQueue(new PersistenceEvent(source));
     }    
     
-    
     @PostRemove
     public void afterDelete(Person person) {
         LOGGER.info("[JPA-EVENT] DELETE completed for PERSON: {} ", person.toString());
         PersistenceEventData source = new PersistenceEventData(PersistenceEventType.DELETE, person);
         addToQueue(new PersistenceEvent(source));
     }
-
     
     private void addToQueue(PersistenceEvent event) {
     	LOGGER.debug("About to update queue");
-
     	try {
 			PersistenceEventPublisher.queue.offer(event,10000,TimeUnit.MILLISECONDS);
 		} catch (Exception e) {
@@ -55,20 +64,26 @@ public class PersistenceEventPublisher implements IPublisher<PersistenceEvent>{
 			LOGGER.error(errorMessage);
 			throw new AddressbookException(errorMessage);
 		}
-    	logQueue();
     	LOGGER.debug("Queue Update completed");
     }
     
-    private void logQueue() {
-    	LOGGER.debug("----------------------------- Printing Queue ----------------------------------------------");
-    	Object[] events = PersistenceEventPublisher.queue.toArray();
-		for(int j=0; j < events.length; j++) {
-			LOGGER.debug(((PersistenceEvent)events[j]).toString());
-        }
-        LOGGER.debug("-------------------------------------------------------------------------------------------");
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+    	PersistenceEventPublisher.persistenceEventFlux.subscribe();
     }
-
-	@Override
+    
+    @Bean
+    public Flux<PersistenceEvent> persistenceEventFlux(){
+    	return PersistenceEventPublisher.persistenceEventFlux;
+    }
+    
+	private Flux<PersistenceEvent> initializeflux() {
+		Flux<PersistenceEvent> eventFlux = Flux.generate((sink) -> {
+			this.publish(sink);
+		});
+		return eventFlux.share();
+	}
+    
 	public void publish(SynchronousSink<PersistenceEvent> sink) {
 		PersistenceEvent event = null;
 		try {
