@@ -84,7 +84,7 @@ public class PersistenceEventPublisher {
 		return eventFlux.share();
 	}
     
-	public void publish(SynchronousSink<PersistenceEvent> sink) {
+	private void publish(SynchronousSink<PersistenceEvent> sink) {
 		PersistenceEvent event = null;
 		try {
 			event = PersistenceEventPublisher.queue.take();
