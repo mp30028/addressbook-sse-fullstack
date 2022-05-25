@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './css/Zonesoft.css';
-//import OtherName from './components/OtherName';
+import OtherNames from './components/OtherNames';
 
 class App extends Component {
 	apiPath = null;
@@ -64,9 +64,6 @@ class App extends Component {
 			console.log(`[setUpEventHandler] this.eventSource.url = ${this.eventSource.url}`);	
 	}
 
-
-
-
 	componentWillUnmount() {
 		console.log("componentWillUnmount Triggered");
 		if(this.eventSource){
@@ -77,9 +74,6 @@ class App extends Component {
 		}
 		console.log(`[componentWillUnmount]this.state = ${JSON.stringify(this.state)}`);
 	}
-
-
-
 
 	render() {
 		return (
@@ -96,31 +90,15 @@ class App extends Component {
 							</tr>
 						</thead>
 						<tbody>
-							{
-
-								this.state.persons.map(
-									person =>
-										<tr key={person.key}>
-											<td>{person.id}</td>
-											<td>{person.firstname}</td>
-											<td>{person.lastname}</td>
-											<td>{person.dateOfBirth[2]}/{person.dateOfBirth[1]}/{person.dateOfBirth[0]}</td>
-											{/*<td><OtherName personId={person.id}/></td>*/}
-											<td className="subtableContainer">
-												<table>
-													<tbody>
-														{person.otherNames.map(otherName =>
-															<tr key={otherName.id}>
-																<td style={{ width: "50%" }}>{otherName.value}</td>
-																<td style={{ width: "50%" }}>{otherName.otherNameType.value}</td>
-															</tr>
-														)}
-													</tbody>
-												</table>
-											</td>
-										</tr>
-								)
-							}
+							{this.state.persons.map(person =>
+								<tr key={person.key}>
+									<td>{person.id}</td>
+									<td>{person.firstname}</td>
+									<td>{person.lastname}</td>
+									<td>{person.dateOfBirth[2]}/{person.dateOfBirth[1]}/{person.dateOfBirth[0]}</td>
+									<td className="subtableContainer"><OtherNames personId={person.id} otherNames={person.otherNames}/></td>
+								</tr>
+							)}
 						</tbody>
 					</table>
 				</div>
