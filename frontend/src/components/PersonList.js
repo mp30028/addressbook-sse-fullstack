@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
 
-class Persons extends Component {
+class PersonList extends Component {
 	apiPath = null;
 	ssePath = null;
 	baseUrl = null;
@@ -99,6 +99,12 @@ class Persons extends Component {
 									<td className="subtableContainer"><OtherNames personId={person.id} otherNames={person.otherNames}/></td>
 								</tr>
 							)}
+							<tr>
+								<td colspan="5">
+									<button>Edit</button>
+									<button>Delete</button>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -107,4 +113,4 @@ class Persons extends Component {
 	}
 }
 
-export default Persons;
+export default PersonList;
