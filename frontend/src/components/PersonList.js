@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
+import FetchAllPersons from './FetchAllPersons';
 
 class PersonList extends Component {
 	apiPath = null;
@@ -18,19 +19,14 @@ class PersonList extends Component {
 	}
 
 	async componentDidMount() {
-		console.log("[componentDidMount] Triggered");
-		console.log(`[componentDidMount] this.baseUrl = ${this.baseUrl}`);
-		console.log(`[componentDidMount] this.apiPath = ${this.apiPath}`);
-		await fetch(this.apiPath, { mode: "no-cors" })
-		.then((response) => response.json())
-        .then((json) => {
-            this.setState({
-                persons: json,
-                isDataInitialised: true
-            })
-        })
-        .then(() => {console.log(`[componentDidMount] this.state = ${JSON.stringify(this.state)}`)})
-        .then(this.setUpEventHandler())
+		let result = await FetchAllPersons();
+		console.log(`[---- componentDidMount -----] result=${JSON.stringify(result.persons)}`);
+        this.setState({
+                persons: result.persons,
+                isDataInitialised: result.isDataInitialised
+            });
+       	  console.log(`[componentDidMount] this.state = ${JSON.stringify(this.state)}`);
+        this.setUpEventHandler();
 	};
 	
 	updateState = (event) => {
@@ -100,7 +96,7 @@ class PersonList extends Component {
 								</tr>
 							)}
 							<tr>
-								<td colspan="5">
+								<td colSpan="5">
 									<button>Edit</button>
 									<button>Delete</button>
 								</td>
