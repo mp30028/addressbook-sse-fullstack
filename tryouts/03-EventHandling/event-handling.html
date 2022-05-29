@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Event Handling</title>
+</head>
+<body>
+	<div id="messageArea">
+	</div>
+
+</body>
+	<script type="module">
+		import {DataEventListener} from './DataEventListener.js';
+		import {DataEventHandler} from './DataEventHandler.js';
+
+		const REACT_APP_SERVER_URL_BASE="http://localhost:8080";
+		const REACT_APP_SSE_URL_PATH = "/sse/addressbook";
+//		const REACT_APP_SERVER_URL_BASE = process.env.REACT_APP_API_SERVER_URL_BASE;
+		let state = {persons: [] };
+
+		const stateSetter = (currentState, newState) => {
+			console.log("[stateSetter] currentState=", JSON.stringify(currentState));
+			console.log("[stateSetter] newState =", JSON.stringify(newState));
+			currentState.persons = newState.persons;
+			document.getElementById("messageArea").innerText = JSON.stringify(currentState);
+		};
+		
+		const eventListenerProperties = {
+			sseUrl: REACT_APP_SERVER_URL_BASE + REACT_APP_SSE_URL_PATH,
+			isListening: false,
+			handler: DataEventHandler,
+			state: state,
+			stateSetter: stateSetter
+		};
+
+		DataEventListener(eventListenerProperties);
+	</script>
+</html>
