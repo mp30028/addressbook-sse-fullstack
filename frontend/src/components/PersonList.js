@@ -2,74 +2,52 @@ import React, { Component } from 'react';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
 import FetchAllPersons from './FetchAllPersons';
+import DataEventListener from './DataEventListener';
 
 class PersonList extends Component {
-	apiPath = null;
-	ssePath = null;
-	baseUrl = null;
-	eventSource = null;
-	
+
 	constructor(props){
 		super(props);
-		this.state = { persons: [], isListening: false, isDataInitialised: false };
-		this.apiPath = "/api/persons/get-all";
-		this.ssePath = "/sse/addressbook";
-		this.baseUrl= process.env.REACT_APP_API_SERVER_URL_BASE;
-			
+		this.state = { 
+			persons: [], 
+			isListening: false, 
+			isDataInitialised: false, 
+			eventSource: null,
+			apiPath: "/api/persons/get-all",
+			ssePath: "/sse/addressbook",
+			baseUrl: process.env.REACT_APP_API_SERVER_URL_BASE
+		};
+		this.updateState = this.updateState.bind(this);
 	}
 
-	async componentDidMount() {
-		let result = await FetchAllPersons();
-		console.log(`[---- componentDidMount -----] result=${JSON.stringify(result.persons)}`);
-        this.setState({
-                persons: result.persons,
-                isDataInitialised: result.isDataInitialised
-            });
-       	  console.log(`[componentDidMount] this.state = ${JSON.stringify(this.state)}`);
-        this.setUpEventHandler();
+	updateState = (newStateProperty) =>{
+		this.setState(newStateProperty);
+	}
+	
+	async componentDidMount() {	
+		if(!this.state.isDataInitialised){
+			await FetchAllPersons({stateSetter : this.updateState, apiPath: this.state.apiPath});
+		};
+		
+		DataEventListener({
+				isListening: this.state.isListening,
+				eventSource: this.state.eventSource,
+				stateSetter: this.updateState,
+				persons: this.state.persons,
+				sseUrl: this.state.baseUrl + this.state.ssePath
+		});
 	};
 	
-	updateState = (event) => {
-		let eventData = JSON.parse(event.data);
-		let person = eventData.source.person;
-		if (eventData.source.eventType === 'UPDATE') {
-			this.setState({ persons: this.state.persons.map(p => { return ((p.id === person.id) ? person : p) }) });
-		} else if (eventData.source.eventType === 'CREATE') {
-			this.setState(({ persons: [...this.state.persons, person] }));
-		} else if (eventData.source.eventType === 'DELETE') {
-			this.setState({ persons: this.state.persons.filter(function(p) { return (p.id === person.id ? null : p) }) });
-		}
-	};
-
-	setUpEventHandler(){
-		console.log(`[setUpEventHandler] this.state = ${JSON.stringify(this.state)}`);	
-		if (this.state.isListening){
-			if(this.eventSource){
-				this.eventSource.close();
-				console.log(`[setUpEventHandler]this.eventSource.close() invoked. this.eventSource.readyState = ${this.eventSource.readyState}`);
-				this.eventSource = null;
-			}			
-		};
-			this.eventSource = new EventSource(this.baseUrl + this.ssePath);
-			console.log(`[setUpEventHandler] Setting up onmessage handler`);
-			this.eventSource.onmessage = (e)=>{
-					console.log(`[EventListener-message] Event ${JSON.stringify(e)} triggered and handled by this.eventSource.onmessage handler`);
-					 this.updateState(e);
-				};
-			this.setState({isListening: true},()=>{console.log(`[setUpEventHandler] this.state = ${JSON.stringify(this.state)}`)});
-			console.log(`[setUpEventHandler] this.eventSource.url = ${this.eventSource.url}`);	
-	}
-
-	componentWillUnmount() {
-		console.log("componentWillUnmount Triggered");
-		if(this.eventSource){
-			this.eventSource.close();
-			console.log(`[componentWillUnmount]this.eventSource.close() invoked. this.eventSource.readyState = ${this.eventSource.readyState}`);
-		}else{
-			console.log("[componentWillUnmount]this.eventSource is not assigned so cannot be closed");
-		}
-		console.log(`[componentWillUnmount]this.state = ${JSON.stringify(this.state)}`);
-	}
+//	componentWillUnmount() {
+//		console.log("componentWillUnmount Triggered");
+//		if(this.eventSource){
+//			this.eventSource.close();
+//			console.log(`[componentWillUnmount]this.eventSource.close() invoked. this.eventSource.readyState = ${this.eventSource.readyState}`);
+//		}else{
+//			console.log("[componentWillUnmount]this.eventSource is not assigned so cannot be closed");
+//		}
+//		console.log(`[componentWillUnmount]this.state = ${JSON.stringify(this.state)}`);
+//	}
 
 	render() {
 		return (

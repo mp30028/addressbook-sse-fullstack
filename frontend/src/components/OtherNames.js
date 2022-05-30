@@ -1,7 +1,6 @@
 import React from 'react';
 
 function OtherNames(props){
-		console.log(props.otherNames);
 		return(
 			<div style={{width: "100%"}}>
 				<table>

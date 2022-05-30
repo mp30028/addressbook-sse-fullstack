@@ -1,14 +1,10 @@
 
-async function FetchAllPersons() {
-	let apiPath = "/api/persons/get-all";
-	let fetchResult = { persons: [], isDataInitialised: false }
+async function FetchAllPersons(props) {
 
-	const response = await fetch(apiPath, { mode: "no-cors" });
+	const response = await fetch(props.apiPath, { mode: "no-cors" });
 	const json = await response.json();
-	fetchResult.persons = json;
-	fetchResult.isDataInitialised = true;
-	console.log(`[FetchAllPersons] fetchResult = ${JSON.stringify(fetchResult)}`);
-	return fetchResult;
+	props.stateSetter({ persons: json });
+	props.stateSetter({isDataInitialised: true})
 };
 
 export default FetchAllPersons;
