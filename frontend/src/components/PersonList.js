@@ -7,67 +7,63 @@ export function PersonList(){
 	const ssePath = "/sse/addressbook";
 	const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
 	const [persons, setPersons] =  useState([]);
-	const [isListening, setIsListening] =  useState(false);
-	const [isDataInitialised, setIsDataInitialised] =  useState(false);
-	const [eventSource, setEventSource] =  useState(null);
+	const [isDataInitialised, setIsDataInitialised] =  useState();
 	const [dataEvent, setDataEvent]= useState(null);
-
-	const messageHandler = (event) => {
-		console.log("[messagHandler] Message Handler Triggered", "event=", event);
-		const eventData = JSON.parse(event.data);
-		const person = eventData.source.person;
-		const eventType = eventData.source.eventType;
-		setDataEvent({ person: person, eventType: eventType });
-	};
-	
-	useEffect(() => {
-		if (isListening && dataEvent){
-			let newPersons = [];
-			if (dataEvent.eventType === 'UPDATE') {
-				newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
-			} else if (dataEvent.eventType === 'CREATE') {
-				newPersons = [...persons, dataEvent.person];
-			} else if (dataEvent.eventType === 'DELETE') {
-				newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) })
-			}
-			console.log("[DataEventListener.handler - before setPersons]", "props.persons.length=", persons.length)
-			console.log("[DataEventListener.handler]", "newPersons.length=", newPersons.length)
-			setPersons(newPersons);
-			console.log("[DataEventListener.handler - after setPersons]", "props.persons.length=", persons.length)
-			setDataEvent(null);
-		}
-	},
-	[dataEvent, isListening, persons]);
 	
 	useEffect(
 		() => {
-			const shutdownEventSource = () => {
-				if (isListening) {
-					if (eventSource) {
-						eventSource.close();
-						setEventSource(null);
-					}
-					setIsListening(false);
-				};
-			};
-			const setup = () => {
-				shutdownEventSource();
-				let eventSource = new EventSource(baseUrl + ssePath);
-				eventSource.onmessage = messageHandler;
-				setEventSource(eventSource);
-				setIsListening(true);
-			}
-				if (!isDataInitialised){
+			if(isDataInitialised === undefined){
+				setIsDataInitialised(false);
+			}else{
+				if(isDataInitialised === false){
 					console.log("[useEffect - fetch started]");
 					fetch(apiPath, { mode: "no-cors" })
 					.then((response) => response.json())
 					.then((data) => {setPersons(data); return data;})
 					.then((data) => console.log("[useEffect - fetch completed]","data.length=",data.length)) 
 					.then(() => setIsDataInitialised(true))
-					.then(setup())
-				};
+				}
 			}
-	,[isDataInitialised, baseUrl, eventSource,isListening]);
+		},
+		[isDataInitialised]
+	);
+	
+	useEffect(
+		() =>{
+			if (isDataInitialised === true){
+				console.log("[useEffect - when isDataInitialised changes]", "isDataInitialised = ", isDataInitialised);			
+				const messageHandler = (event) => {
+					console.log("[messagHandler] Message Handler Triggered", "event=", event);
+					const eventData = JSON.parse(event.data);
+					const person = eventData.source.person;
+					const eventType = eventData.source.eventType;
+					setDataEvent({ person: person, eventType: eventType });
+				};
+				const eventSource = new EventSource(baseUrl + ssePath);
+				eventSource.onmessage = messageHandler;
+			}
+		},
+		[isDataInitialised, baseUrl]
+	);
+	
+	useEffect(
+		() => {
+			if (dataEvent){
+				let newPersons = [];
+				if (dataEvent.eventType === 'UPDATE') {
+					newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
+				} else if (dataEvent.eventType === 'CREATE') {
+					newPersons = [...persons, dataEvent.person];
+				} else if (dataEvent.eventType === 'DELETE') {
+					newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) })
+				}
+				setPersons(newPersons);
+				setDataEvent(null);
+			}
+		},
+		[dataEvent, persons]
+	);
+	
 
 		return (
 			<div>
