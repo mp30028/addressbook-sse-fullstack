@@ -1,13 +1,10 @@
-import React, { Component } from 'react';
-import Persons from './components/Persons';
+import React from 'react';
+import PersonList from './components/PersonList';
 
-class App extends Component {
-
-	render() {
+function App(){
 		return (
-			<div><Persons/></div>
+			<div><PersonList/></div>
 		);
-	}
 }
 
 export default App;

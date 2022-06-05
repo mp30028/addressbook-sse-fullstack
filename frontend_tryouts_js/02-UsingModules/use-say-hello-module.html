@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hello from Modules</title>
+</head>
+<body>
+	<div id="messageArea">
+	</div>
+
+</body>
+	
+	<script type="module" >
+		import {SayHello} from './SayHelloModule.js';
+		var message = SayHello("USER");
+		document.getElementById("messageArea").innerText = message;
+	</script>
+</html>
