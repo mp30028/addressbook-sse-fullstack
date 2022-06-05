@@ -1,58 +1,76 @@
-import React, { Component } from 'react';
+import React, {useState, useEffect} from 'react';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
-import FetchAllPersons from './FetchAllPersons';
-import DataEventListener from './DataEventListener';
 
-class PersonList extends Component {
+export function PersonList(){
+	const apiPath = "/api/persons/get-all";
+	const ssePath = "/sse/addressbook";
+	const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
+	const [persons, setPersons] =  useState([]);
+	const [isListening, setIsListening] =  useState(false);
+	const [isDataInitialised, setIsDataInitialised] =  useState(false);
+	const [eventSource, setEventSource] =  useState(null);
+	const [dataEvent, setDataEvent]= useState(null);
 
-	constructor(props){
-		super(props);
-		this.state = { 
-			persons: [], 
-			isListening: false, 
-			isDataInitialised: false, 
-			eventSource: null,
-			apiPath: "/api/persons/get-all",
-			ssePath: "/sse/addressbook",
-			baseUrl: process.env.REACT_APP_API_SERVER_URL_BASE
-		};
-		this.updateState = this.updateState.bind(this);
-	}
-
-	updateState = (newStateProperty) =>{
-		this.setState(newStateProperty);
-	}
-	
-	async componentDidMount() {	
-		if(!this.state.isDataInitialised){
-			await FetchAllPersons({stateSetter : this.updateState, apiPath: this.state.apiPath});
-		};
-		
-		DataEventListener({
-				isListening: this.state.isListening,
-				eventSource: this.state.eventSource,
-				stateSetter: this.updateState,
-				persons: this.state.persons,
-				sseUrl: this.state.baseUrl + this.state.ssePath
-		});
+	const messageHandler = (event) => {
+		console.log("[messagHandler] Message Handler Triggered", "event=", event);
+		const eventData = JSON.parse(event.data);
+		const person = eventData.source.person;
+		const eventType = eventData.source.eventType;
+		setDataEvent({ person: person, eventType: eventType });
 	};
 	
-//	componentWillUnmount() {
-//		console.log("componentWillUnmount Triggered");
-//		if(this.eventSource){
-//			this.eventSource.close();
-//			console.log(`[componentWillUnmount]this.eventSource.close() invoked. this.eventSource.readyState = ${this.eventSource.readyState}`);
-//		}else{
-//			console.log("[componentWillUnmount]this.eventSource is not assigned so cannot be closed");
-//		}
-//		console.log(`[componentWillUnmount]this.state = ${JSON.stringify(this.state)}`);
-//	}
+	useEffect(() => {
+		if (isListening && dataEvent){
+			let newPersons = [];
+			if (dataEvent.eventType === 'UPDATE') {
+				newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
+			} else if (dataEvent.eventType === 'CREATE') {
+				newPersons = [...persons, dataEvent.person];
+			} else if (dataEvent.eventType === 'DELETE') {
+				newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) })
+			}
+			console.log("[DataEventListener.handler - before setPersons]", "props.persons.length=", persons.length)
+			console.log("[DataEventListener.handler]", "newPersons.length=", newPersons.length)
+			setPersons(newPersons);
+			console.log("[DataEventListener.handler - after setPersons]", "props.persons.length=", persons.length)
+			setDataEvent(null);
+		}
+	},
+	[dataEvent, isListening, persons]);
+	
+	useEffect(
+		() => {
+			const shutdownEventSource = () => {
+				if (isListening) {
+					if (eventSource) {
+						eventSource.close();
+						setEventSource(null);
+					}
+					setIsListening(false);
+				};
+			};
+			const setup = () => {
+				shutdownEventSource();
+				let eventSource = new EventSource(baseUrl + ssePath);
+				eventSource.onmessage = messageHandler;
+				setEventSource(eventSource);
+				setIsListening(true);
+			}
+				if (!isDataInitialised){
+					console.log("[useEffect - fetch started]");
+					fetch(apiPath, { mode: "no-cors" })
+					.then((response) => response.json())
+					.then((data) => {setPersons(data); return data;})
+					.then((data) => console.log("[useEffect - fetch completed]","data.length=",data.length)) 
+					.then(() => setIsDataInitialised(true))
+					.then(setup())
+				};
+			}
+	,[isDataInitialised, baseUrl, eventSource,isListening]);
 
-	render() {
 		return (
 			<div>
-				<div>
 					<table className="zsft-table">
 						<thead>
 							<tr>
@@ -64,7 +82,7 @@ class PersonList extends Component {
 							</tr>
 						</thead>
 						<tbody>
-							{this.state.persons.map(person =>
+							{persons.map(person =>
 								<tr key={person.key}>
 									<td>{person.id}</td>
 									<td>{person.firstname}</td>
@@ -81,10 +99,8 @@ class PersonList extends Component {
 							</tr>
 						</tbody>
 					</table>
-				</div>
 			</div>
 		);
-	}
 }
 
 export default PersonList;
