@@ -7,7 +7,7 @@ export function PersonEdit(props) {
 	console.log("[PersonEdit] props.selectedPerson=", props.selectedPerson);
 	let [person, setPerson] = useState(props.selectedPerson);
 	console.log("[PersonEdit] person)=", person);
-//debugger;
+
 	const updatePerson = (event) => {
 		const {name, value} = event.target;
 		if (name === 'id'){
