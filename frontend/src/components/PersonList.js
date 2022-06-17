@@ -9,7 +9,8 @@ export function PersonList(){
 	
 //-------------------------------------------------------------Data Fetch And Synch code--------------------------------------------------------------	
 	
-	const apiPath = "/api/persons/get-all";
+	const apiPathToGetAll = "/api/persons/get-all";
+	const apiPathToUpdate = "/api/persons/update";
 	const ssePath = "/sse/addressbook";
 	const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
 	const [persons, setPersons] =  useState([]);
@@ -24,7 +25,7 @@ export function PersonList(){
 			}else{
 				if(isDataInitialised === false){
 					console.log("[useEffect - fetch started]");
-					fetch(apiPath, { mode: "no-cors" })
+					fetch(apiPathToGetAll, { mode: "no-cors" })
 					.then((response) => response.json())
 					.then((data) => {setPersons(data); return data;})
 					.then((data) => console.log("[useEffect - fetch completed]","data.length=",data.length)) 
@@ -94,9 +95,24 @@ export function PersonList(){
 		setAction(lastAction);
 	}
 	
-//	const shouldSelect = (id) =>{
-//		return ( selectedPerson ? selectedPerson.id === id : false);
-//	}
+	const updatePerson = (sourcePerson) =>{
+		console.log("[PersonList.updatePerson] sourcePerson=", sourcePerson, "selectedPerson=", selectedPerson);
+		const jsonString = JSON.stringify(sourcePerson, null, "    ");
+		console.log("[PersonList.updatePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
+		fetch(
+			apiPathToUpdate,
+			{
+//				mode: 'no-cors',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json;charset=UTF-8',
+					'Accept': 'application/json, text/plain'
+				},
+				body: jsonString
+			}
+		)
+
+	}
 
 	useEffect(
 		() => {
@@ -138,6 +154,7 @@ export function PersonList(){
 		},
 		[selectedPerson, navigate, emptyPerson]	
 	);
+	
 		return (
 			<div style={{ display: "flex", width: "100%"}}>
 				<nav className="zsft-explorer" style={{width: "50%"}}>
@@ -175,8 +192,8 @@ export function PersonList(){
 					</table>
 				</nav>
 				<Routes>
-					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} />} />
-					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} />} />
+					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} updatePerson={updatePerson} />} />
+					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} updatePerson={updatePerson} />} />
 				</Routes>
 				<Outlet />
 			</div>

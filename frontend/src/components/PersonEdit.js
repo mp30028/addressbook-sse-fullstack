@@ -3,33 +3,55 @@ import '../css/Zonesoft.css';
 import OtherNamesEdit from './OtherNamesEdit';
 
 export function PersonEdit(props) {
-//	const emptyPerson =  {id:0, firstname:'', lastname:'', dateOfBirth: ''};
 	console.log("[PersonEdit] props.selectedPerson=", props.selectedPerson);
-	let [person, setPerson] = useState(props.selectedPerson);
-	console.log("[PersonEdit] person)=", person);
+	let [selectedPerson, setSelectedPerson] = useState(props.selectedPerson);
+	let [selectedPersonsOtherNames, setSelectedPersonsOtherNames] = useState([]);
+	console.log("[PersonEdit] person)=", selectedPerson);
 
+
+	
 	const updatePerson = (event) => {
 		const {name, value} = event.target;
 		if (name === 'id'){
-			setPerson({...person, [name]:parseInt(value)})	
+			setSelectedPerson({...selectedPerson, [name]:parseInt(value)})	
 		}else{
-			setPerson({...person, [name]:value})
+			setSelectedPerson({...selectedPerson, [name]:value})
 		}
 		
 	}
 	
 	const handleSubmit = (event) =>{
 		event.preventDefault();
-//		props.updatePersons(event.target.value, person);
+		selectedPerson.otherNames = selectedPersonsOtherNames;
+		props.updatePerson(selectedPerson);
 	}
 
 
 	useEffect(
 		() =>{
-			setPerson(props.selectedPerson);
+			const deepCopy = (src) => {
+				let target = Array.isArray(src) ? [] : {};
+				for (let key in src) {
+					let v = src[key];
+					if (v) {
+						if (typeof v === "object") {
+							target[key] = deepCopy(v);
+						} else {
+							target[key] = v;
+						}
+					} else {
+						target[key] = v;
+					}
+				}
+				return target;
+			}
+			setSelectedPerson(props.selectedPerson);
+			setSelectedPersonsOtherNames(deepCopy(props.selectedPerson.otherNames))
+
 		},
 		[props.selectedPerson]
 	)
+	
 	return (
 		<form style={{padding: "1rem", width:"30%" }}>
 			<table  className="zsft-table">
@@ -37,54 +59,25 @@ export function PersonEdit(props) {
 				<tr>
 					<th>Person ID</th>
 					<td>
-						<input type="text" name="personId" id="personId" value={person.id} readOnly />
+						<input type="text" name="personId" id="personId" value={selectedPerson.id} readOnly />
 					</td>
 				</tr>
 				<tr>
 					<th>Firstname</th>
-					<td><input type="text" name="firstname" id="firstname" value={person.firstname} onChange={updatePerson} /></td>
+					<td><input type="text" name="firstname" id="firstname" value={selectedPerson.firstname} onChange={updatePerson} /></td>
 				</tr>
 				<tr>
 					<th>Lastname</th>
-					<td><input type="text" name="lastname" id="lastname" value={person.lastname} onChange={updatePerson} /></td>
+					<td><input type="text" name="lastname" id="lastname" value={selectedPerson.lastname} onChange={updatePerson} /></td>
 				</tr>
 				<tr>
 					<th>Date of Birth</th>
-					<td><input type="text" name="dateOfBirth" id="dateOfBirth" value={person.dateOfBirth} onChange={updatePerson} /></td>
+					<td><input type="text" name="dateOfBirth" id="dateOfBirth" value={selectedPerson.dateOfBirth} onChange={updatePerson} /></td>
 				</tr>
 				<tr>
 					<th>Other Names</th>
 					<td className="subtableContainer">
-						<OtherNamesEdit otherNames={person.otherNames}/>
-{/* 
-						<table id="otherNamesTable" className="subtableContainer">
-							
-							<thead>
-								<tr>
-									<th>Other-Name</th>
-									<th>Name-Type</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-							<tr>
-								<td>
-									<input type="text" name="otherNameValue" id="otherNameValue" />
-								</td>
-
-								<td>
-									<select name="otherNameTypeId" id="otherNameTypeId">
-										<option value="-1"></option>
-									</select>
-								</td>
-
-								<td>
-									<button type="button" name="otherNameDeleteButton" id="otherNameDeleteButton"></button>
-								</td>
-							</tr>
-							</tbody>
-						</table>
-*/}
+						<OtherNamesEdit otherNames={selectedPersonsOtherNames}/>
 					</td>
 				</tr>
 						<tr>
