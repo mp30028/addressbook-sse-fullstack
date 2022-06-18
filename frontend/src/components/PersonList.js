@@ -1,160 +1,156 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {Outlet, Route, Routes, useNavigate} from 'react-router-dom';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
 import PersonEdit from './PersonEdit';
+import {GetAll, AddNew, ListenForDataEvents} from '../services/PersonDataService';
 
-export function PersonList(){
-	
-	
-//-------------------------------------------------------------Data Fetch And Synch code--------------------------------------------------------------	
-	
-	const apiPathToGetAll = "/api/persons/get-all";
-	const apiPathToUpdate = "/api/persons/update";
-	const ssePath = "/sse/addressbook";
-	const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
+const MODULE = "MODULE:PersonList";
+
+export function PersonList(){	
+	const FUNCTION = " FUNCTION:PersonList";
+
+	const emptyPerson = useMemo(() => {return  {id:0, firstname:'', lastname:'', dateOfBirth: '', otherNames: []}}, []);
 	const [persons, setPersons] =  useState([]);
-	const [isDataInitialised, setIsDataInitialised] =  useState();
 	const [dataEvent, setDataEvent]= useState(null);
 	const [selectedPerson, setSelectedPerson] = useState(null);
-
-	useEffect(
-		() => {
-			if(isDataInitialised === undefined){
-				setIsDataInitialised(false);
-			}else{
-				if(isDataInitialised === false){
-					console.log("[useEffect - fetch started]");
-					fetch(apiPathToGetAll, { mode: "no-cors" })
-					.then((response) => response.json())
-					.then((data) => {setPersons(data); return data;})
-					.then((data) => console.log("[useEffect - fetch completed]","data.length=",data.length)) 
-					.then(() => setIsDataInitialised(true))
-				}
-			}
-		},
-		[isDataInitialised]
-	);
-	
-	useEffect(
-		() =>{
-			if (isDataInitialised === true){
-				console.log("[useEffect - when isDataInitialised changes]", "isDataInitialised = ", isDataInitialised);			
-				const messageHandler = (event) => {
-					console.log("[messagHandler] Message Handler Triggered", "event=", event);
-					const eventData = JSON.parse(event.data);
-					const person = eventData.source.person;
-					const eventType = eventData.source.eventType;
-					setDataEvent({ person: person, eventType: eventType });
-				};
-				const eventSource = new EventSource(baseUrl + ssePath);
-				eventSource.onmessage = messageHandler;
-			}
-		},
-		[isDataInitialised, baseUrl]
-	);
-	
-	useEffect(
-		() => {
-			if (dataEvent){
-				let newPersons = [];
-				if (dataEvent.eventType === 'UPDATE') {
-					newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
-				} else if (dataEvent.eventType === 'CREATE') {
-					newPersons = [...persons, dataEvent.person];
-				} else if (dataEvent.eventType === 'DELETE') {
-					newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) })
-				}
-				setPersons(newPersons);
-				setDataEvent(null);
-				setAction({act: "dataEvent", person: selectedPerson});
-			}
-		},
-		[dataEvent, persons, selectedPerson]
-	);
-	
-	
-//-------------------------------------------------------------UI Code--------------------------------------------------------------
+	const [fetchedData, setFetchedData] = useState([]);
+//	const [addNewRequested, setAddNewRequested] = useState(false);
 	const navigate = useNavigate();
-	const emptyPerson = useMemo(() => {return  {id:0, firstname:'', lastname:'', dateOfBirth: ''}}, []);
-//	const [selectedPerson, setSelectedPerson] = useState(null);
-	const [action, setAction] = useState();
-	let lastAction = {act: null, person: null};
-
-	const handleSelection = (event) => {
-		const idToFind = parseInt(event.target.value);
-		lastAction.act = event.target.name;
-		lastAction.person = persons.find(p => p.id === idToFind);
-		setAction(lastAction);
-		console.log("[PersonList.handleSelection] lastAction=", lastAction)
-	}
 	
-	const handleAddNew = (event) => {
-		lastAction.act = event.target.name;
-		lastAction.person = emptyPerson;
-		setAction(lastAction);
-	}
-	
-	const updatePerson = (sourcePerson) =>{
-		console.log("[PersonList.updatePerson] sourcePerson=", sourcePerson, "selectedPerson=", selectedPerson);
-		const jsonString = JSON.stringify(sourcePerson, null, "    ");
-		console.log("[PersonList.updatePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
-		fetch(
-			apiPathToUpdate,
-			{
-//				mode: 'no-cors',
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json;charset=UTF-8',
-					'Accept': 'application/json, text/plain'
-				},
-				body: jsonString
-			}
-		)
-
-	}
-
-	useEffect(
-		() => {
-			if (action){
-				switch(action.act){
-					case "selectPerson":
-						setSelectedPerson(action.person);
-						break;
-					case "addPerson":
-						setSelectedPerson(emptyPerson);
-						break;
-					case "dataEvent":
-						const idToFind = parseInt(action.person.id);
-						let person = persons.find(p => p.id === idToFind);
-						if (!person){
-							setSelectedPerson(emptyPerson);
-						}
-						break;
-					default:
+	const handleDataEvent = useCallback(
+		(dataEvent) => {
+			const ROUTINE = "ROUTINE:handleDataEvent";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} dataEvent=`, dataEvent);
+			let newPersons = [];
+			if (dataEvent.eventType === 'UPDATE') {
+				newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
+			} else if (dataEvent.eventType === 'CREATE') {
+				newPersons = [...persons, dataEvent.person];
+			} else if (dataEvent.eventType === 'DELETE') {
+				newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) });
+				if (selectedPerson) {
+					if (selectedPerson.id === dataEvent.person.id) {
 						setSelectedPerson(null);
-						break;
-				};
-			};
+					}
+				}
+			}
+			setPersons(newPersons);
 		},
-		[action, emptyPerson, persons]		
+		[persons, selectedPerson]
 	)
 	
 	useEffect(
 		() =>{
+			const ROUTINE = "EFFECT:[fetchedData]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} fetchedData.length=`, fetchedData.length);
+			if(fetchedData.length > 0){
+				setPersons(fetchedData);
+				ListenForDataEvents({setDataEvent: setDataEvent});
+			}else{
+				const data = GetAll({setData: setFetchedData});
+				if (data){
+					setFetchedData(data);	
+				}
+				
+			}
+		},
+		[fetchedData]
+	);
+	
+
+	useEffect(
+		() => {
+			const ROUTINE = "EFFECT:[dataEvent, handleDataEvent]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} dataEvent=`, dataEvent);
+			if(dataEvent){
+				handleDataEvent(dataEvent);
+				setDataEvent(null);
+			};
+		},
+		[dataEvent, handleDataEvent]
+	);
+
+	useEffect(
+		() =>{
+			const ROUTINE = "EFFECT:[selectedPerson, navigate, emptyPerson]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} selectedPerson.id=`, selectedPerson ? selectedPerson.id : "selectedPerson is null");
 			if(!selectedPerson){
 				navigate("/list", { replace: true });
 				
 			} else if(selectedPerson.id === emptyPerson.id){
 				navigate("add", { replace: true });
 			}else{
-				console.log("[PeopleList.useEffect[selectedPerson]] selectedPerson", selectedPerson);
 	    		navigate("edit", { replace: true });
 	    	}
 		},
 		[selectedPerson, navigate, emptyPerson]	
 	);
+
+	const handleSelection = (event) => {
+		const ROUTINE = "ROUTINE:handleSelection";
+		const idToFind = parseInt(event.target.value);
+		const targetPerson = persons.find(p => p.id === idToFind);
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} targetPerson=`, targetPerson);
+		if (targetPerson){
+			setSelectedPerson(targetPerson);	
+		}else{
+			setSelectedPerson(null);
+		}
+	}
 	
+	const isChecked = (id) =>{
+		const ROUTINE = "ROUTINE:isChecked";
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} id=`, id, "selectedPerson.id=" , selectedPerson ? selectedPerson.id : "selectedPerson is null" );
+		return ( selectedPerson ? selectedPerson.id === id : false);
+	}
+	
+//	
+	const handleAddNew = (event) => {
+		setSelectedPerson(emptyPerson);
+	}
+	
+	const addNewPerson = (sourcePerson) =>{
+		AddNew({sourcePerson: sourcePerson});
+		setSelectedPerson(null);
+	}	
+	
+//	
+	const updatePerson = (sourcePerson) =>{
+//		console.log("[PersonList.updatePerson] sourcePerson=", sourcePerson, "selectedPerson=", selectedPerson);
+//		const jsonString = JSON.stringify(sourcePerson, null, "    ");
+//		console.log("[PersonList.updatePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
+//		fetch(
+//			apiPathToUpdate,
+//			{
+//				method: 'POST',
+//				headers: {
+//					'Content-Type': 'application/json;charset=UTF-8',
+//					'Accept': 'application/json, text/plain'
+//				},
+//				body: jsonString
+//			}
+//		)
+//
+	}
+//
+	const deletePerson = (sourcePerson) =>{
+//		console.log("[PersonList.deletePerson] sourcePerson=", sourcePerson);
+//		const jsonString = JSON.stringify(sourcePerson, null, "    ");
+//		console.log("[PersonList.deletePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
+//		fetch(
+//			apiPathToDelete.replace("{id}",sourcePerson.id),
+//			{
+//				method: 'DELETE',
+//				headers: {
+//					'Content-Type': 'application/json;charset=UTF-8',
+//					'Accept': 'application/json, text/plain'
+//				}
+//			}
+//		)
+//
+	}
+
 		return (
 			<div style={{ display: "flex", width: "100%"}}>
 				<nav className="zsft-explorer" style={{width: "50%"}}>
@@ -178,7 +174,7 @@ export function PersonList(){
 									<td>{person.dateOfBirth[2]}/{person.dateOfBirth[1]}/{person.dateOfBirth[0]}</td>
 									<td className="subtableContainer"><OtherNames personId={person.id} otherNames={person.otherNames}/></td>
 									<td style={{textAlign:"center"}}>
-										<input type="radio" name="selectPerson" id={'selected' + person.id} value={person.id} onChange={handleSelection}  />
+										<input type="radio" name="selectPerson" id={'selected' + person.id} value={person.id} onChange={handleSelection} checked={isChecked(person.id)} />
 										<label htmlFor={'selected' + person.id} className="ellipses">. . .</label>
 									</td>
 								</tr>
@@ -192,8 +188,8 @@ export function PersonList(){
 					</table>
 				</nav>
 				<Routes>
-					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} updatePerson={updatePerson} />} />
-					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} updatePerson={updatePerson} />} />
+					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} updatePerson={updatePerson} deletePerson={deletePerson} />} />
+					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} updatePerson={addNewPerson} />} />
 				</Routes>
 				<Outlet />
 			</div>

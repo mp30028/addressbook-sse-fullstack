@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
+const MODULE = "MODULE:OtherNamesEdit";
+
 function OtherNamesEdit(props){
+	const FUNCTION = " FUNCTION:OtherNamesEdit";
 	const emptyOtherNames = [];
 	const [currentOtherNames, setCurrentOtherNames] = useState(emptyOtherNames);
 	
@@ -11,12 +14,11 @@ function OtherNamesEdit(props){
 		[props.otherNames]
 	)
 	
-
-	
 	useEffect(
 		() => {
+			const ROUTINE = "EFFECT:[currentOtherNames]";
 			if (currentOtherNames) {
-				console.log("[OtherNamesEdit.useEffect[otherNames]]");
+				console.log(`${MODULE} ${FUNCTION} ${ROUTINE}`);
 			}
 
 		},
@@ -24,8 +26,9 @@ function OtherNamesEdit(props){
 	)
 	
 	const updateOtherName = (event) => {
+		const ROUTINE = "FUNCTION:updateOtherName";
 		const {name, value} = event.target;
-		console.log ("[OtherNamesEdit.updateOtherName] name=", name, "value=", value,"event.target.id=", event.target.id);
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE}name=`, name, "value=", value, "event.target.id=", event.target.id);
 		const editedItemId = event.target.id.split("_");
 		const idToFind = parseInt(editedItemId[1]);
 		const otherName = currentOtherNames.find(on => on.id === idToFind);

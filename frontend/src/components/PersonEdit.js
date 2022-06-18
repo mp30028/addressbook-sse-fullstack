@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import {useNavigate} from 'react-router-dom';
 import '../css/Zonesoft.css';
 import OtherNamesEdit from './OtherNamesEdit';
 
+const MODULE = "MODULE:PersonEdit";
+
 export function PersonEdit(props) {
-	console.log("[PersonEdit] props.selectedPerson=", props.selectedPerson);
+	const FUNCTION = " FUNCTION:PersonEdit";
+	console.log(`${MODULE} ${FUNCTION} props.selectedPerson=`, props.selectedPerson);
 	let [selectedPerson, setSelectedPerson] = useState(props.selectedPerson);
 	let [selectedPersonsOtherNames, setSelectedPersonsOtherNames] = useState([]);
-	console.log("[PersonEdit] person)=", selectedPerson);
-
+	const navigate = useNavigate();
 
 	
-	const updatePerson = (event) => {
+	const handleChange = (event) => {
 		const {name, value} = event.target;
 		if (name === 'id'){
 			setSelectedPerson({...selectedPerson, [name]:parseInt(value)})	
@@ -22,8 +25,25 @@ export function PersonEdit(props) {
 	
 	const handleSubmit = (event) =>{
 		event.preventDefault();
-		selectedPerson.otherNames = selectedPersonsOtherNames;
-		props.updatePerson(selectedPerson);
+		switch(event.target.value){
+			case "UPDATE":
+				selectedPerson.otherNames = selectedPersonsOtherNames;
+				props.updatePerson(selectedPerson);
+				break;
+			case "CREATE":
+				selectedPerson.otherNames = selectedPersonsOtherNames;
+				props.updatePerson(selectedPerson);
+				break;
+			case "CANCEL":
+				navigate("/list", { replace: true });
+				break;
+			case "DELETE":
+				navigate("/list", { replace: true });
+				props.deletePerson(selectedPerson);
+				break;
+			default:
+				navigate("/list", { replace: true });
+		}
 	}
 
 
@@ -45,9 +65,14 @@ export function PersonEdit(props) {
 				}
 				return target;
 			}
-			setSelectedPerson(props.selectedPerson);
-			setSelectedPersonsOtherNames(deepCopy(props.selectedPerson.otherNames))
-
+			if (props.selectedPerson){
+				setSelectedPerson(props.selectedPerson);
+				if (props.selectedPerson.otherNames){
+					setSelectedPersonsOtherNames(deepCopy(props.selectedPerson.otherNames));
+				}else{
+					setSelectedPersonsOtherNames(null);
+				}
+			}
 		},
 		[props.selectedPerson]
 	)
@@ -64,15 +89,15 @@ export function PersonEdit(props) {
 				</tr>
 				<tr>
 					<th>Firstname</th>
-					<td><input type="text" name="firstname" id="firstname" value={selectedPerson.firstname} onChange={updatePerson} /></td>
+					<td><input type="text" name="firstname" id="firstname" value={selectedPerson.firstname} onChange={handleChange} /></td>
 				</tr>
 				<tr>
 					<th>Lastname</th>
-					<td><input type="text" name="lastname" id="lastname" value={selectedPerson.lastname} onChange={updatePerson} /></td>
+					<td><input type="text" name="lastname" id="lastname" value={selectedPerson.lastname} onChange={handleChange} /></td>
 				</tr>
 				<tr>
 					<th>Date of Birth</th>
-					<td><input type="text" name="dateOfBirth" id="dateOfBirth" value={selectedPerson.dateOfBirth} onChange={updatePerson} /></td>
+					<td><input type="text" name="dateOfBirth" id="dateOfBirth" value={selectedPerson.dateOfBirth} onChange={handleChange} /></td>
 				</tr>
 				<tr>
 					<th>Other Names</th>
@@ -84,8 +109,8 @@ export function PersonEdit(props) {
 							<td colSpan="2" style={{textAlign:"right"}}>
 								{(props.action === "EDIT") ? <button type="submit" onClick={handleSubmit} value="DELETE">Delete</button> : "" }
 								{(props.action === "EDIT") ? <button type="submit" onClick={handleSubmit} value="UPDATE">Save</button>: ""}
-								{(props.action === "ADD") ? <button type="submit" onClick={handleSubmit} value="CREATE">Create</button>: ""}					
-								<button type="submit" value="CANCEL">Cancel</button>
+								{(props.action === "ADD") ? <button type="submit" onClick={handleSubmit} value="CREATE">Add New</button>: ""}					
+								<button type="submit" onClick={handleSubmit} value="CANCEL">Cancel</button>
 							</td>
 						</tr>
 				</tbody>
