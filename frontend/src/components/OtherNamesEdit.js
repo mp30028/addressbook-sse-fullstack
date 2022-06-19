@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {OtherNameTypes} from './OtherNameTypes';
 
 const MODULE = "MODULE:OtherNamesEdit";
 
@@ -70,8 +71,14 @@ function OtherNamesEdit(props){
 					<tbody>
 						{otherNames.map(otherName =>
 							<tr key={otherName.id}>
-								<td><input type="text" name="otherNameValue" id={"value_" + otherName.id} value={otherName.value} onChange={handleChangeToOtherName}/></td>
-								<td><input type="text" name="otherNameType" id={"otherNameType.value_" + otherName.id}  value={otherName.otherNameType.value} onChange={handleChangeToOtherName}/></td>
+								<td><input type="text" name="otherNameValue" id={"value_" + otherName.id} value={otherName.value} onChange={handleChangeToOtherName}/></td>								
+								<td>
+									<OtherNameTypes dropDownName={"otherNameType_" + otherName.id} dropDownId={"otherNameType_" + otherName.id} otherNameTypeId={otherName.otherNameType.id} />
+{/* 								
+									<input type="text" name="otherNameType" id={"otherNameType.value_" + otherName.id}  value={otherName.otherNameType.value} onChange={handleChangeToOtherName}/>
+*/}
+								</td>
+								
 								<td style={{textAlign:"center"}}>
 								<button className="deleteButton" name="deleteOtherName" id={'deleteOtherName_' + otherName.id} value={otherName.id}  onClick={handleDeleteOtherName}/>
 								</td>
