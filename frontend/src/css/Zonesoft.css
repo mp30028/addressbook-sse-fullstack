@@ -102,3 +102,39 @@ input[type="radio"]:checked + label {
 .ellipses:hover {
   background-color: grey;
 }
+
+button.deleteButton{
+	background-image: url(../icons/delete_grey.svg);
+	background-size: cover;
+	background-color: white;
+	height: 20px;
+	width: 50px;
+	border: none;
+}
+
+button.deleteButton:hover{
+	background-image: url(../icons/delete_colour.svg);
+	background-size: cover;
+/* 	background-color: #d2d2d2; */
+	height: 20px;
+	width: 50px;
+	border: none;
+}
+
+button.addNewButton{
+	background-image: url(../icons/addnew_grey.svg);
+	background-size: cover;
+	background-color: white;
+	height: 30px;
+	width: 50px;
+	border: none;
+}
+
+button.addNewButton:hover{
+	background-image: url(../icons/addnew_colour.svg);
+	background-size: cover;
+/* 	background-color: silver; */
+	height: 30px;
+	width: 50px;
+	border: none;
+}
