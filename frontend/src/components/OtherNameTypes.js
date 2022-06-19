@@ -16,14 +16,6 @@ export const OtherNameTypes = (props) =>{
 		[]
 	)
 	
-//	useEffect(
-//		() =>{
-//			const ROUTINE = "EFFECT:[fetchedOtherNameTypes]";
-//			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} otherNameTypes.length=`, otherNameTypes ? otherNameTypes.length : "otherNameTypes is null or undefined");
-//		},
-//		[otherNameTypes]
-//	)
-	
 	const handleChange = (event) =>{
 		const ROUTINE = "FUNCTION:handleChange";
 		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} event=`, event);
