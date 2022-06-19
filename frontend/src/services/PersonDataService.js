@@ -4,6 +4,7 @@ const MODULE = "MODULE:PersonDataService";
 const ssePath = "/sse/addressbook";
 const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
 const apiPathToGetAll = "/api/persons/get-all";
+const apiPathToOtherNameTypes = "/api/persons/other-name-types";
 //const apiPathToUpdate = "/api/persons/update";
 //const apiPathToDelete = "/api/persons/delete/{id}";
 const apiPathToAddNew = "/api/persons/add-new";
@@ -50,4 +51,10 @@ export const AddNew = (props) =>{
 
 }
 	
-	
+export const GetOtherNameTypes = (props) =>{
+	const FUNCTION = " FUNCTION:GetOtherNameTypes";
+	fetch(apiPathToOtherNameTypes, { mode: "no-cors" })
+		.then((response) => response.json())
+		.then((data) => {console.log(`[${MODULE} ${FUNCTION}] data.length=`, data.length);return data})
+		.then((data) => {props.setOtherNameTypes(data); return data});
+}	
