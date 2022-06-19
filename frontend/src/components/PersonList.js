@@ -3,7 +3,7 @@ import {Outlet, Route, Routes, useNavigate} from 'react-router-dom';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
 import PersonEdit from './PersonEdit';
-import {GetAll, AddNew, ListenForDataEvents} from '../services/PersonDataService';
+import {GetAll, AddNew,Delete, ListenForDataEvents} from '../services/PersonDataService';
 
 const MODULE = "MODULE:PersonList";
 
@@ -134,21 +134,11 @@ export function PersonList(){
 //
 	}
 //
-	const deletePerson = (sourcePerson) =>{
-//		console.log("[PersonList.deletePerson] sourcePerson=", sourcePerson);
-//		const jsonString = JSON.stringify(sourcePerson, null, "    ");
-//		console.log("[PersonList.deletePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
-//		fetch(
-//			apiPathToDelete.replace("{id}",sourcePerson.id),
-//			{
-//				method: 'DELETE',
-//				headers: {
-//					'Content-Type': 'application/json;charset=UTF-8',
-//					'Accept': 'application/json, text/plain'
-//				}
-//			}
-//		)
-//
+	const deletePerson = (sourcePerson) => {
+		const ROUTINE = "FUNCTION:deletePerson";
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} sourcePerson=`, sourcePerson);
+		Delete({ sourcePerson: sourcePerson });
+		setSelectedPerson(null);
 	}
 
 		return (

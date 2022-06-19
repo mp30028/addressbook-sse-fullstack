@@ -6,7 +6,7 @@ const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
 const apiPathToGetAll = "/api/persons/get-all";
 const apiPathToOtherNameTypes = "/api/persons/other-name-types";
 //const apiPathToUpdate = "/api/persons/update";
-//const apiPathToDelete = "/api/persons/delete/{id}";
+const apiPathToDelete = "/api/persons/delete/{id}";
 const apiPathToAddNew = "/api/persons/add-new";
 
 export function GetAll(props) {
@@ -49,6 +49,21 @@ export const AddNew = (props) =>{
 			}
 		)
 
+}
+
+export const Delete = (props) =>{
+	const FUNCTION = "FUNCTION:Delete";
+	console.log(`${MODULE} ${FUNCTION} props.sourcePerson=`, props.sourcePerson);
+		fetch(
+			apiPathToDelete.replace("{id}",props.sourcePerson.id),
+			{
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json;charset=UTF-8',
+					'Accept': 'application/json, text/plain'
+				}
+			}
+		)
 }
 	
 export const GetOtherNameTypes = (props) =>{
