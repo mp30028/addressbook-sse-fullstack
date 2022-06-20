@@ -163,7 +163,7 @@ export function PersonList(){
 				</nav>
 				<Routes>
 					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} updatePerson={updatePerson} deletePerson={deletePerson} />} />
-					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} updatePerson={addNewPerson} />} />
+					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} addNewPerson={addNewPerson} />} />
 				</Routes>
 				<Outlet />
 			</div>

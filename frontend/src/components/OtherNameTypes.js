@@ -6,6 +6,7 @@ const MODULE = "MODULE:OtherNameTypes";
 export const OtherNameTypes = (props) =>{
 	const FUNCTION = "FUNCTION:OtherNameTypes";
 	const [otherNameTypes, setOtherNameTypes] = useState([]);
+	const [currentValue, setCurrentValue]=useState(props.otherNameTypeId);
 
 	useEffect(
 		() =>{
@@ -16,14 +17,25 @@ export const OtherNameTypes = (props) =>{
 		[]
 	)
 	
+	useEffect(
+		() => {
+			const ROUTINE = "EFFECT:[currentValue]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} HOOK TRIGGERED`);
+			props.setOtherNameTypeId(currentValue);
+		},
+		[currentValue, props]
+	)
+	
 	const handleChange = (event) =>{
 		const ROUTINE = "FUNCTION:handleChange";
-		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} event=`, event);
+		const {name, value} = event.target;
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} name=`, name, "value", value);
+		setCurrentValue(value);
 	}
 	
 	return (
 		<main>
-			<select name={props.dropDownName} id={props.dropDownId} value={props.otherNameTypeId} onChange={handleChange}>
+			<select name={props.dropDownName} id={props.dropDownId} value={currentValue} onChange={handleChange}>
 				{otherNameTypes.map(
 					(otherNameType) => <option value={otherNameType.id} key={otherNameType.id}>{otherNameType.value}</option>
 				)}

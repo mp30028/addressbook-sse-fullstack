@@ -9,7 +9,7 @@ export function PersonEdit(props) {
 	const FUNCTION = " FUNCTION:PersonEdit";
 	console.log(`${MODULE} ${FUNCTION} props.selectedPerson=`, props.selectedPerson);
 	const [selectedPerson, setSelectedPerson] = useState(props.selectedPerson);
-	let [selectedPersonsOtherNames, setSelectedPersonsOtherNames] = useState([]);
+	const [selectedPersonsOtherNames, setSelectedPersonsOtherNames] = useState([]);
 	const navigate = useNavigate();
 
 	
@@ -34,8 +34,9 @@ export function PersonEdit(props) {
 				props.updatePerson(selectedPerson);
 				break;
 			case "CREATE":
-//				selectedPerson.otherNames = selectedPersonsOtherNames;
-				props.updatePerson(selectedPerson);
+				selectedPerson.otherNames = selectedPersonsOtherNames;
+				props.addNewPerson(selectedPerson);
+				console.log(`${MODULE} ${FUNCTION} ${ROUTINE} CREATE selectedPerson=`, selectedPerson);
 				break;
 			case "CANCEL":
 				navigate("/list", { replace: true });

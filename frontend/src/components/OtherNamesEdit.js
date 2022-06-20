@@ -30,12 +30,12 @@ function OtherNamesEdit(props){
 	};	
 	
 	const handleAddNewOtherName = (event) =>{
-		const ROUTINE = "FUNCTION: handleAddNewOtherName";
-		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} event.target.name=`, event.target.name);
-		const temporaryId = Date.now() * -1;
-		const emptyOtherName = {id: temporaryId , value: "", otherNameType: {id: 6, value: "Firstname at birth"}};
 		event.preventDefault();
+		const ROUTINE = "FUNCTION: handleAddNewOtherName";
+		const temporaryId = Date.now() * -1;
+		const emptyOtherName = {id: temporaryId , value: "", otherNameType: {id: 6}};
 		const newOtherNames = [...props.otherNames, emptyOtherName];
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} event.target.name=`, event.target.name, "newOtherNames=", newOtherNames);
 		props.setOtherNames(newOtherNames);
 	}
 	
@@ -54,7 +54,11 @@ function OtherNamesEdit(props){
 							<tr key={otherName.id}>
 								<td><input type="text" name="otherNameValue" id={"value_" + otherName.id} value={otherName.value} onChange={handleChangeToOtherName}/></td>								
 								<td>
-									<OtherNameTypes dropDownName={"otherNameType_" + otherName.id} dropDownId={"otherNameType_" + otherName.id} otherNameTypeId={otherName.otherNameType.id} />
+									<OtherNameTypes 
+										dropDownName={"otherNameType_" + otherName.id} 
+										dropDownId={"otherNameType_" + otherName.id} 
+										otherNameTypeId={otherName.otherNameType.id} 
+										setOtherNameTypeId= {(newId) => { otherName.otherNameType.id = newId}} />
 								</td>
 								
 								<td style={{textAlign:"center"}}>
