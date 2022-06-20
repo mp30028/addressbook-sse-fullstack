@@ -8,7 +8,7 @@ const MODULE = "MODULE:PersonEdit";
 export function PersonEdit(props) {
 	const FUNCTION = " FUNCTION:PersonEdit";
 	console.log(`${MODULE} ${FUNCTION} props.selectedPerson=`, props.selectedPerson);
-	let [selectedPerson, setSelectedPerson] = useState(props.selectedPerson);
+	const [selectedPerson, setSelectedPerson] = useState(props.selectedPerson);
 	let [selectedPersonsOtherNames, setSelectedPersonsOtherNames] = useState([]);
 	const navigate = useNavigate();
 
@@ -24,14 +24,17 @@ export function PersonEdit(props) {
 	}
 	
 	const handleSubmit = (event) =>{
+		const ROUTINE = " ROUTINE:handleSubmit";
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} event=`, event);
 		event.preventDefault();
 		switch(event.target.value){
 			case "UPDATE":
+				console.log(`${MODULE} ${FUNCTION} ${ROUTINE} UPDATE selectedPerson=`, selectedPerson);
 				selectedPerson.otherNames = selectedPersonsOtherNames;
 				props.updatePerson(selectedPerson);
 				break;
 			case "CREATE":
-				selectedPerson.otherNames = selectedPersonsOtherNames;
+//				selectedPerson.otherNames = selectedPersonsOtherNames;
 				props.updatePerson(selectedPerson);
 				break;
 			case "CANCEL":
@@ -44,6 +47,7 @@ export function PersonEdit(props) {
 			default:
 				navigate("/list", { replace: true });
 		}
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} [FINAL-VALUE]selectedPerson=`, selectedPerson);
 	}
 
 
@@ -102,7 +106,7 @@ export function PersonEdit(props) {
 				<tr>
 					<th>Other Names</th>
 					<td className="subtableContainer">
-						<OtherNamesEdit otherNames={selectedPersonsOtherNames}/>
+						<OtherNamesEdit otherNames={selectedPersonsOtherNames} setOtherNames={setSelectedPersonsOtherNames}/>
 					</td>
 				</tr>
 						<tr>

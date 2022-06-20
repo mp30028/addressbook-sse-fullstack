@@ -3,7 +3,7 @@ import {Outlet, Route, Routes, useNavigate} from 'react-router-dom';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
 import PersonEdit from './PersonEdit';
-import {GetAll, AddNew,Delete, ListenForDataEvents} from '../services/PersonDataService';
+import {GetAll, AddNew,Delete, Update, ListenForDataEvents} from '../services/PersonDataService';
 
 const MODULE = "MODULE:PersonList";
 
@@ -58,7 +58,6 @@ export function PersonList(){
 		[fetchedData]
 	);
 	
-
 	useEffect(
 		() => {
 			const ROUTINE = "EFFECT:[dataEvent, handleDataEvent]";
@@ -100,12 +99,11 @@ export function PersonList(){
 	}
 	
 	const isChecked = (id) =>{
-		const ROUTINE = "ROUTINE:isChecked";
-		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} id=`, id, "selectedPerson.id=" , selectedPerson ? selectedPerson.id : "selectedPerson is null" );
+//		const ROUTINE = "ROUTINE:isChecked";
+//		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} id=`, id, "selectedPerson.id=" , selectedPerson ? selectedPerson.id : "selectedPerson is null" );
 		return ( selectedPerson ? selectedPerson.id === id : false);
 	}
 	
-//	
 	const handleAddNew = (event) => {
 		setSelectedPerson(emptyPerson);
 	}
@@ -115,25 +113,11 @@ export function PersonList(){
 		setSelectedPerson(null);
 	}	
 	
-//	
 	const updatePerson = (sourcePerson) =>{
-//		console.log("[PersonList.updatePerson] sourcePerson=", sourcePerson, "selectedPerson=", selectedPerson);
-//		const jsonString = JSON.stringify(sourcePerson, null, "    ");
-//		console.log("[PersonList.updatePerson - Fetch Started] sourcerPerson (json) = ", jsonString);
-//		fetch(
-//			apiPathToUpdate,
-//			{
-//				method: 'POST',
-//				headers: {
-//					'Content-Type': 'application/json;charset=UTF-8',
-//					'Accept': 'application/json, text/plain'
-//				},
-//				body: jsonString
-//			}
-//		)
-//
+		Update({sourcePerson: sourcePerson});
+		setSelectedPerson(null);
 	}
-//
+
 	const deletePerson = (sourcePerson) => {
 		const ROUTINE = "FUNCTION:deletePerson";
 		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} sourcePerson=`, sourcePerson);
