@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zonesoft.addressbook.entities.OtherNameType;
 import com.zonesoft.addressbook.entities.Person;
 import com.zonesoft.addressbook.services.PersonDataService;
 
@@ -56,9 +57,15 @@ public class ApiController {
 		return resultOfFind;
 	}
 	
-	@DeleteMapping("delete/{id}")
+	@DeleteMapping("/delete/{id}")
 	public void delete(@PathVariable  Long id){
 		personDataService.delete(id);
+	}
+	
+	@GetMapping("/other-name-types")
+	@ResponseBody
+	public List<OtherNameType> getOtherNameTypes(){
+		return (List<OtherNameType>) personDataService.getOtherNameTypes();
 	}
 	
 }

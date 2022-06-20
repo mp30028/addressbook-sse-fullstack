@@ -1,73 +1,134 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import {Outlet, Route, Routes, useNavigate} from 'react-router-dom';
 import '../css/Zonesoft.css';
 import OtherNames from './OtherNames';
+import PersonEdit from './PersonEdit';
+import {GetAll, AddNew,Delete, Update, ListenForDataEvents} from '../services/PersonDataService';
 
-export function PersonList(){
-	const apiPath = "/api/persons/get-all";
-	const ssePath = "/sse/addressbook";
-	const baseUrl = process.env.REACT_APP_API_SERVER_URL_BASE;
+const MODULE = "MODULE:PersonList";
+
+export function PersonList(){	
+	const FUNCTION = " FUNCTION:PersonList";
+
+	const emptyPerson = useMemo(() => {return  {id:0, firstname:'', lastname:'', dateOfBirth: '', otherNames: []}}, []);
 	const [persons, setPersons] =  useState([]);
-	const [isDataInitialised, setIsDataInitialised] =  useState();
 	const [dataEvent, setDataEvent]= useState(null);
+	const [selectedPerson, setSelectedPerson] = useState(null);
+	const [fetchedData, setFetchedData] = useState([]);
+//	const [addNewRequested, setAddNewRequested] = useState(false);
+	const navigate = useNavigate();
 	
-	useEffect(
-		() => {
-			if(isDataInitialised === undefined){
-				setIsDataInitialised(false);
-			}else{
-				if(isDataInitialised === false){
-					console.log("[useEffect - fetch started]");
-					fetch(apiPath, { mode: "no-cors" })
-					.then((response) => response.json())
-					.then((data) => {setPersons(data); return data;})
-					.then((data) => console.log("[useEffect - fetch completed]","data.length=",data.length)) 
-					.then(() => setIsDataInitialised(true))
+	const handleDataEvent = useCallback(
+		(dataEvent) => {
+			const ROUTINE = "ROUTINE:handleDataEvent";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} dataEvent=`, dataEvent);
+			let newPersons = [];
+			if (dataEvent.eventType === 'UPDATE') {
+				newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
+			} else if (dataEvent.eventType === 'CREATE') {
+				newPersons = [...persons, dataEvent.person];
+			} else if (dataEvent.eventType === 'DELETE') {
+				newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) });
+				if (selectedPerson) {
+					if (selectedPerson.id === dataEvent.person.id) {
+						setSelectedPerson(null);
+					}
 				}
 			}
+			setPersons(newPersons);
 		},
-		[isDataInitialised]
-	);
+		[persons, selectedPerson]
+	)
 	
 	useEffect(
 		() =>{
-			if (isDataInitialised === true){
-				console.log("[useEffect - when isDataInitialised changes]", "isDataInitialised = ", isDataInitialised);			
-				const messageHandler = (event) => {
-					console.log("[messagHandler] Message Handler Triggered", "event=", event);
-					const eventData = JSON.parse(event.data);
-					const person = eventData.source.person;
-					const eventType = eventData.source.eventType;
-					setDataEvent({ person: person, eventType: eventType });
-				};
-				const eventSource = new EventSource(baseUrl + ssePath);
-				eventSource.onmessage = messageHandler;
+			const ROUTINE = "EFFECT:[fetchedData]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} fetchedData.length=`, fetchedData.length);
+			if(fetchedData.length > 0){
+				setPersons(fetchedData);
+				ListenForDataEvents({setDataEvent: setDataEvent});
+			}else{
+				const data = GetAll({setData: setFetchedData});
+				if (data){
+					setFetchedData(data);	
+				}
+				
 			}
 		},
-		[isDataInitialised, baseUrl]
+		[fetchedData]
 	);
 	
 	useEffect(
 		() => {
-			if (dataEvent){
-				let newPersons = [];
-				if (dataEvent.eventType === 'UPDATE') {
-					newPersons = persons.map(p => { return ((p.id === dataEvent.person.id) ? dataEvent.person : p) });
-				} else if (dataEvent.eventType === 'CREATE') {
-					newPersons = [...persons, dataEvent.person];
-				} else if (dataEvent.eventType === 'DELETE') {
-					newPersons = persons.filter((p) => { return (p.id === dataEvent.person.id ? null : p) })
-				}
-				setPersons(newPersons);
+			const ROUTINE = "EFFECT:[dataEvent, handleDataEvent]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} dataEvent=`, dataEvent);
+			if(dataEvent){
+				handleDataEvent(dataEvent);
 				setDataEvent(null);
-			}
+			};
 		},
-		[dataEvent, persons]
+		[dataEvent, handleDataEvent]
 	);
+
+	useEffect(
+		() =>{
+			const ROUTINE = "EFFECT:[selectedPerson, navigate, emptyPerson]";
+			console.log(`${MODULE} ${FUNCTION} ${ROUTINE} selectedPerson.id=`, selectedPerson ? selectedPerson.id : "selectedPerson is null");
+			if(!selectedPerson){
+				navigate("/list", { replace: true });
+				
+			} else if(selectedPerson.id === emptyPerson.id){
+				navigate("add", { replace: true });
+			}else{
+	    		navigate("edit", { replace: true });
+	    	}
+		},
+		[selectedPerson, navigate, emptyPerson]	
+	);
+
+	const handleSelection = (event) => {
+		const ROUTINE = "ROUTINE:handleSelection";
+		const idToFind = parseInt(event.target.value);
+		const targetPerson = persons.find(p => p.id === idToFind);
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} targetPerson=`, targetPerson);
+		if (targetPerson){
+			setSelectedPerson(targetPerson);	
+		}else{
+			setSelectedPerson(null);
+		}
+	}
 	
+	const isChecked = (id) =>{
+//		const ROUTINE = "ROUTINE:isChecked";
+//		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} id=`, id, "selectedPerson.id=" , selectedPerson ? selectedPerson.id : "selectedPerson is null" );
+		return ( selectedPerson ? selectedPerson.id === id : false);
+	}
+	
+	const handleAddNew = (event) => {
+		setSelectedPerson(emptyPerson);
+	}
+	
+	const addNewPerson = (sourcePerson) =>{
+		AddNew({sourcePerson: sourcePerson});
+		setSelectedPerson(null);
+	}	
+	
+	const updatePerson = (sourcePerson) =>{
+		Update({sourcePerson: sourcePerson});
+		setSelectedPerson(null);
+	}
+
+	const deletePerson = (sourcePerson) => {
+		const ROUTINE = "FUNCTION:deletePerson";
+		console.log(`${MODULE} ${FUNCTION} ${ROUTINE} sourcePerson=`, sourcePerson);
+		Delete({ sourcePerson: sourcePerson });
+		setSelectedPerson(null);
+	}
 
 		return (
-			<div>
-					<table className="zsft-table">
+			<div style={{ display: "flex", width: "100%"}}>
+				<nav className="zsft-explorer" style={{width: "50%"}}>
+					<table className="zsft-table" style={{width: "100%"}}>
 						<thead>
 							<tr>
 								<th>ID</th>
@@ -75,6 +136,7 @@ export function PersonList(){
 								<th>Lastname</th>
 								<th>Date of Birth</th>
 								<th>Other Names</th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -85,16 +147,25 @@ export function PersonList(){
 									<td>{person.lastname}</td>
 									<td>{person.dateOfBirth[2]}/{person.dateOfBirth[1]}/{person.dateOfBirth[0]}</td>
 									<td className="subtableContainer"><OtherNames personId={person.id} otherNames={person.otherNames}/></td>
+									<td style={{textAlign:"center"}}>
+										<input type="radio" name="selectPerson" id={'selected' + person.id} value={person.id} onChange={handleSelection} checked={isChecked(person.id)} />
+										<label htmlFor={'selected' + person.id} className="ellipses">. . .</label>
+									</td>
 								</tr>
 							)}
 							<tr>
-								<td colSpan="5">
-									<button>Edit</button>
-									<button>Delete</button>
+								<td colSpan="7" style={{textAlign:"right"}}>
+									<button type="submit" name="addPerson" onClick={handleAddNew}>Add New</button>
 								</td>
 							</tr>
 						</tbody>
 					</table>
+				</nav>
+				<Routes>
+					<Route path="edit" element={<PersonEdit action="EDIT" selectedPerson={selectedPerson} updatePerson={updatePerson} deletePerson={deletePerson} />} />
+					<Route path="add" element={<PersonEdit action="ADD" selectedPerson={selectedPerson} addNewPerson={addNewPerson} />} />
+				</Routes>
+				<Outlet />
 			</div>
 		);
 }

@@ -76,6 +76,10 @@ public class PersonDataService {
 		personRepository.deleteById(id);
 	}
 	
+	public List<OtherNameType> getOtherNameTypes(){
+		return otherNameTypeRepository.findAll();
+	}
+	
 	private Optional<OtherNameType> getOtherNameTypeByValue(String value) {
 		List<OtherNameType> result = otherNameTypeRepository.findByValue(value);
 		if (result.size() > 0) {

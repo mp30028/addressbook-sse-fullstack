@@ -1,7 +1,7 @@
 table.zsft-table {
-	border-style: solid;
-	border-width: 1pt;
-	border-color: black;
+/* 	border-style: solid; */
+/* 	border-width: 1pt; */
+/* 	border-color: black; */
 	font-family: Arial;
 	font-size: 9pt;
 	width: 90%;
@@ -24,16 +24,17 @@ table.zsft-table td {
 }
 
 table.zsft-table th {
-	background-color: rgb(64, 128, 128);
+	background-color: rgb(87, 87, 87);
 	color: white;
 	font-weight: bold;
 	text-align: center;
+	padding: 5pt;
 }
 
 table.zsft-table table.info {
 	border-style: solid;
 	border-width: 1pt;
-	border-color: grey;
+	border-color: rgb(87, 87, 87);
 	font-family: Arial;
 	font-size: 9pt;
 	width: 60%;
@@ -68,4 +69,72 @@ table.zsft-table td.subtableContainer tr {
 
 table.zsft-table td.subtableContainer table td {
 	border-style: none;
+}
+
+nav.zsft-menu {
+	border-bottom: solid;
+	border-bottom-width: 1px;
+	padding-bottom: 1rem;
+}
+
+nav.zsft-explorer {
+	border-right: solid;
+	border-right-width: 1px;
+	padding: 1rem;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"]:checked + label {
+    border: 1px solid red;
+    background-color: red;
+}
+
+.ellipses {
+	font-weight: bold;
+	text-align: center;
+	padding-left: 4pt;
+	padding-right: 4pt;
+}
+
+.ellipses:hover {
+  background-color: grey;
+}
+
+button.deleteButton{
+	background-image: url(../icons/delete_grey.svg);
+	background-size: cover;
+	background-color: white;
+	height: 20px;
+	width: 50px;
+	border: none;
+}
+
+button.deleteButton:hover{
+	background-image: url(../icons/delete_colour.svg);
+	background-size: cover;
+/* 	background-color: #d2d2d2; */
+	height: 20px;
+	width: 50px;
+	border: none;
+}
+
+button.addNewButton{
+	background-image: url(../icons/addnew_grey.svg);
+	background-size: cover;
+	background-color: white;
+	height: 30px;
+	width: 50px;
+	border: none;
+}
+
+button.addNewButton:hover{
+	background-image: url(../icons/addnew_colour.svg);
+	background-size: cover;
+/* 	background-color: silver; */
+	height: 30px;
+	width: 50px;
+	border: none;
 }
