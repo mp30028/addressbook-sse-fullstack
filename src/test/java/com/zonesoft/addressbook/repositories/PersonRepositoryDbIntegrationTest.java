@@ -13,24 +13,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.zonesoft.addressbook.configurations.ApplicationStartupConfigs;
 import com.zonesoft.addressbook.entities.Person;
 import org.testcontainers.ext.ScriptUtils;
 import org.testcontainers.jdbc.JdbcDatabaseDelegate;
 
 @Testcontainers()
-//@DataJpaTest
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
-//@ContextConfiguration(classes = {PersistenceEventForwarder.class,JpaEventForwarder.class,PersistenceEventData.class,PersistenceEvent.class,PersistenceEventType.class})
 @SpringBootTest
 class PersonRepositoryDbIntegrationTest extends AbstractMySqlContainer {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersonRepositoryDbIntegrationTest.class);
+	
+	@MockBean private ApplicationStartupConfigs startupConfigs;
+	
 	
 	@DynamicPropertySource
 	static void setProperties(DynamicPropertyRegistry registry) {
